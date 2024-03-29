@@ -5,14 +5,17 @@ const pool = new Pool({
     ssl: process.env.DATABASE_URL ? true : false
 })
 
-const getUsers = async (req,res)=>{
+const getClients = async (req,res)=>{
     try
     {
-        const response = await pool.query('SELECT * FROM users');
-        res.status(200).json(response.rows);
+        const {user_id} = req.body;
+        if (!user_id) {
+            return res.status(400).json({ error: "User ID is missing in the request body" });
+        }
+        const response = await pool.query('select * from clients where user_id = $1',[user_id]);
+        return res.status(200).json(response.rows);
     }
     catch(error){
-        console.log(error);
         res.send("Error: "+error);
     }
 };
@@ -51,7 +54,7 @@ const updateUser = async(req,res) => {
 };
 
 module.exports = {
-    getUsers,
+    getClients,
     getUserById,
     createUser,
     deleteUser,
